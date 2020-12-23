@@ -1,5 +1,5 @@
 /*
- * Adam Leone
+ * ildrummer
  * Oct 2020
  * 
  * Use an ESP32-CAM with a DS18B20 waterproof temperature probe to collect
