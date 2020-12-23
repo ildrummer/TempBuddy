@@ -1,0 +1,33 @@
+import json
+import requests
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+c_handler = logging.StreamHandler()
+
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+
+f_handler.setLevel(logging.DEBUG)
+f_formatter = 
+
+logging.debug('Polling remote temp stations')
+
+tempHosts = ["192.168.1.10", "192.168.1.11", "192.168.1.12"]
+
+for x in tempHosts:
+	try:
+		response = requests.get("http://" + x + "/temperature", timeout=10)
+	except requests.Timeout as err:
+		logging.error("Connection to ESP32 " + x + " timed out")
+	except requests.RequestException as err:
+		print ("Connection error for ESP32 " + x)
+	except:
+		logging.exception("Exception when connecting to " + str(x))
+	else:
+		if response.status_code == 200:
+			print (response.json()['value'])
+		else:
+			logging.error("Error code from ESP32 " + x + ": " + str(response.status_code))
