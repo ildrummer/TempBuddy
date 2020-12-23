@@ -1,3 +1,8 @@
+# 
+# Main program that collects temperature data.
+#    - currently set up to gather data once and then end.  Will be modified for temperature collection/storage every minute.
+#
+
 import threading
 import json
 import requests
@@ -33,14 +38,15 @@ def setupLogging():
 
 	return
 
+
+# Call the database handler to store a temperature value from a remote sensor into an SQLite database
 def logTemp(address, tempValue):
 	if dbConn:
 		dbConn.logTemp(address, tempValue)
 
 
 
-
-
+# Call a REST API function on a remote temperature sensor and extract the temperature value from the JSON response
 def getTemp(address):
 
 

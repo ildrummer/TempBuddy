@@ -23,7 +23,7 @@ class TestTemperatureDB:
 	def test_DBNotEmptyAfterCommit(self):
 		db = TemperatureDatabaseHandler('testTempDB.sql')
 		db.logTemp("192.168.1.10", 100)
-		assert db.isEmpty()
+		assert not db.isEmpty()
 
 	def test_EntryCommittedSameSelected (self):
 		db = TemperatureDatabaseHandler('testTempDB.sql')

@@ -1,3 +1,7 @@
+#
+# Subclass of Thread that will return a value from the thread's function
+#
+
 from threading import Thread
 
 class TemperatureThread(Thread):
