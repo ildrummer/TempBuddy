@@ -7,6 +7,7 @@ import threading
 import json
 import requests
 import sys
+import sys
 import logging
 from tempDBHandler import TemperatureDatabaseHandler
 from tempThread import TemperatureThread
@@ -28,15 +29,13 @@ def setupLogging():
 	streamHandler.setFormatter(tempFormat)
 	streamHandler.setLevel(logging.WARNING)
 
-	fileHandler = logging.FileHandler('temperatures.log')
+	fileHandler = logging.FileHandler('.\\Logs\\temperatures.log')
 	fileHandler.setFormatter(tempFormat)
 	fileHandler.setLevel(logging.DEBUG)
 
 	logger.setLevel(logging.DEBUG)
 	logger.addHandler(streamHandler)
 	logger.addHandler(fileHandler)
-
-	return
 
 
 # Call the database handler to store a temperature value from a remote sensor into an SQLite database
@@ -58,9 +57,9 @@ def getTemp(address):
 		response = requests.get("http://" + address + "/temperature", timeout=10)
 
 	except requests.Timeout as err:
-		logger.error("Connection to ESP32 " + address + " timed out")
+		logger.error("Connection to " + address + " timed out")
 	except requests.RequestException as err:
-		logger.error("Connection error for ESP32 " + address)
+		logger.error("Connection error (Request Exception) for " + address)
 	except:
 		logger.exception("Exception when connecting to " + str(address))
 
@@ -70,7 +69,7 @@ def getTemp(address):
 			remoteTemp = response.json()['value']
 			
 		else:
-			logger.error("Error code from ESP32 " + address + ": " + str(response.status_code))
+			logger.error("Error code from " + address + ": " + str(response.status_code))
 
 	return remoteTemp
 
@@ -80,10 +79,9 @@ def main():
 	dbConn = TemperatureDatabaseHandler('test.sql')
 
 	threads = []
-	
+
 	for x in tempHosts:
 
-		#tempThread = threading.Thread(target=getAndPrintTemp, args=(dbConn.cursor(),x,))
 		tempThread = TemperatureThread(target=getTemp, args=(x,))
 		threads.append(tempThread)
 		tempThread.start()
@@ -91,7 +89,6 @@ def main():
 	for x in threads:
 		print (x.join())
 	return
-
 
 if __name__ == "__main__":
 	main()
