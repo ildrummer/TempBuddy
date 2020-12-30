@@ -2,10 +2,13 @@ import sqlite3
 import pytest
 from datetime import datetime
 import sys
-sys.path.insert(0, "C:\\Users\\a\\Documents\\Programming\\Python\\TempServer")
-from tempDBHandler import TemperatureDatabaseHandler
+import os
+from pathlib import Path
 
-class TestTemperatureDB:
+sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent, "TempSrc"))
+from dbHandler import TemperatureDatabaseHandler
+
+class TestDBHandler:
 
 	def test_DBConnectedWithOverridenConstructor (self):
 		db = TemperatureDatabaseHandler('testTempDB.sql')

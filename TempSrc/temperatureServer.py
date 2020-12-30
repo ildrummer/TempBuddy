@@ -3,6 +3,7 @@
 #    - currently set up to gather data once and then end.  Will be modified for temperature collection/storage every minute.
 #
 
+import time
 import threading
 import json
 import requests
@@ -74,9 +75,9 @@ def getTemp(address):
 	return remoteTemp
 
 
-def main():
-	setupLogging()
-	dbConn = TemperatureDatabaseHandler('test.sql')
+def collectDataLoop():
+	
+	
 
 	threads = []
 
@@ -86,9 +87,29 @@ def main():
 		threads.append(tempThread)
 		tempThread.start()
 
-	for x in threads:
-		print (x.join())
+	for x in range(len(threads)):
+		logTemp(tempHosts[x], threads[x].join())
 	return
+
+
+
+def main():
+	setupLogging()
+	dbConn = TemperatureDatabaseHandler('test.sql')
+
+	for i in range(3):
+		print("Collecting temps (iteration " + str(i) + ")")
+		collectDataLoop()
+		time.sleep(5)
+	
+	
+	print ("Finished storing temperatures")
+
+	print("All records from database:")
+	print(dbConn.getAllRecords())
+
+
+	dbConn.closeDBConnection()
 
 if __name__ == "__main__":
 	main()

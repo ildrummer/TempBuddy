@@ -1,0 +1,68 @@
+2020-12-30T11:34:29,189 Using pip 20.3.3 from c:\python39\lib\site-packages\pip (python 3.9)
+2020-12-30T11:34:29,196 Non-user install because site-packages writeable
+2020-12-30T11:34:29,212 Created temporary directory: C:\Users\Adam\AppData\Local\Temp\pip-ephem-wheel-cache-9et1myq_
+2020-12-30T11:34:29,213 Created temporary directory: C:\Users\Adam\AppData\Local\Temp\pip-req-tracker-movlk954
+2020-12-30T11:34:29,213 Initialized build tracking at C:\Users\Adam\AppData\Local\Temp\pip-req-tracker-movlk954
+2020-12-30T11:34:29,214 Created build tracker: C:\Users\Adam\AppData\Local\Temp\pip-req-tracker-movlk954
+2020-12-30T11:34:29,214 Entered build tracker: C:\Users\Adam\AppData\Local\Temp\pip-req-tracker-movlk954
+2020-12-30T11:34:29,215 Created temporary directory: C:\Users\Adam\AppData\Local\Temp\pip-install-j524uckm
+2020-12-30T11:34:29,249 Obtaining file:///C:/Users/Adam/Documents/TempBuddy
+2020-12-30T11:34:29,251   Added file:///C:/Users/Adam/Documents/TempBuddy to build tracker 'C:\\Users\\Adam\\AppData\\Local\\Temp\\pip-req-tracker-movlk954'
+2020-12-30T11:34:29,252     Running setup.py (path:C:\Users\Adam\Documents\TempBuddy\setup.py) egg_info for package from file:///C:/Users/Adam/Documents/TempBuddy
+2020-12-30T11:34:29,255     Created temporary directory: C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz
+2020-12-30T11:34:29,255     Running command python setup.py egg_info
+2020-12-30T11:34:29,846     running egg_info
+2020-12-30T11:34:29,847     creating C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz\TempBuddy.egg-info
+2020-12-30T11:34:29,848     writing C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz\TempBuddy.egg-info\PKG-INFO
+2020-12-30T11:34:29,852     writing dependency_links to C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz\TempBuddy.egg-info\dependency_links.txt
+2020-12-30T11:34:29,855     writing top-level names to C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz\TempBuddy.egg-info\top_level.txt
+2020-12-30T11:34:29,856     writing manifest file 'C:\Users\Adam\AppData\Local\Temp\pip-pip-egg-info-_9abdgqz\TempBuddy.egg-info\SOURCES.txt'
+2020-12-30T11:34:29,910     error: package directory 'TempBuddy' does not exist
+2020-12-30T11:34:29,931 ERROR: Command errored out with exit status 1: python setup.py egg_info Check the logs for full command output.
+2020-12-30T11:34:29,931 Exception information:
+2020-12-30T11:34:29,931 Traceback (most recent call last):
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\cli\base_command.py", line 224, in _main
+2020-12-30T11:34:29,931     status = self.run(options, args)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\cli\req_command.py", line 180, in wrapper
+2020-12-30T11:34:29,931     return func(self, options, args)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\commands\install.py", line 320, in run
+2020-12-30T11:34:29,931     requirement_set = resolver.resolve(
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\resolver.py", line 121, in resolve
+2020-12-30T11:34:29,931     self._result = resolver.resolve(
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_vendor\resolvelib\resolvers.py", line 445, in resolve
+2020-12-30T11:34:29,931     state = resolution.resolve(requirements, max_rounds=max_rounds)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_vendor\resolvelib\resolvers.py", line 310, in resolve
+2020-12-30T11:34:29,931     name, crit = self._merge_into_criterion(r, parent=None)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_vendor\resolvelib\resolvers.py", line 169, in _merge_into_criterion
+2020-12-30T11:34:29,931     name = self._p.identify(requirement)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\provider.py", line 60, in identify
+2020-12-30T11:34:29,931     return dependency.name
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\requirements.py", line 41, in name
+2020-12-30T11:34:29,931     return self.candidate.name
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\candidates.py", line 188, in name
+2020-12-30T11:34:29,931     return self.project_name
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\candidates.py", line 182, in project_name
+2020-12-30T11:34:29,931     self._name = canonicalize_name(self.dist.project_name)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\candidates.py", line 239, in dist
+2020-12-30T11:34:29,931     self._prepare()
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\candidates.py", line 226, in _prepare
+2020-12-30T11:34:29,931     dist = self._prepare_distribution()
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\resolution\resolvelib\candidates.py", line 346, in _prepare_distribution
+2020-12-30T11:34:29,931     return self._factory.preparer.prepare_editable_requirement(self._ireq)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\operations\prepare.py", line 575, in prepare_editable_requirement
+2020-12-30T11:34:29,931     dist = _get_prepared_distribution(
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\operations\prepare.py", line 88, in _get_prepared_distribution
+2020-12-30T11:34:29,931     abstract_dist.prepare_distribution_metadata(finder, build_isolation)
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\distributions\sdist.py", line 41, in prepare_distribution_metadata
+2020-12-30T11:34:29,931     self.req.prepare_metadata()
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\req\req_install.py", line 555, in prepare_metadata
+2020-12-30T11:34:29,931     self.metadata_directory = self._generate_metadata()
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\req\req_install.py", line 530, in _generate_metadata
+2020-12-30T11:34:29,931     return generate_metadata_legacy(
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\operations\build\metadata_legacy.py", line 70, in generate_metadata
+2020-12-30T11:34:29,931     call_subprocess(
+2020-12-30T11:34:29,931   File "c:\python39\lib\site-packages\pip\_internal\utils\subprocess.py", line 240, in call_subprocess
+2020-12-30T11:34:29,931     raise InstallationError(exc_msg)
+2020-12-30T11:34:29,931 pip._internal.exceptions.InstallationError: Command errored out with exit status 1: python setup.py egg_info Check the logs for full command output.
+2020-12-30T11:34:30,046 Removed file:///C:/Users/Adam/Documents/TempBuddy from build tracker 'C:\\Users\\Adam\\AppData\\Local\\Temp\\pip-req-tracker-movlk954'
+2020-12-30T11:34:30,046 Removed build tracker: 'C:\\Users\\Adam\\AppData\\Local\\Temp\\pip-req-tracker-movlk954'
