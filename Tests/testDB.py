@@ -8,31 +8,37 @@ from pathlib import Path
 sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent, "TempSrc"))
 from dbHandler import TemperatureDatabaseHandler
 
-class TestDBHandler:
+@pytest.fixture(scope="session")
+def dbSetup():
+	dateFormat = "%Y%m%d-%H%M%S"
+	dbName = "testDB_" + datetime.strftime(datetime.now(), dateFormat) + ".sql"
+	print("Fixture creating db with name: " + dbName)
+	return TemperatureDatabaseHandler(dbName)
 
-	def test_DBConnectedWithOverridenConstructor (self):
-		db = TemperatureDatabaseHandler('testTempDB.sql')
-		assert db.isConnected()
 
-	def test_DBConncectionAfterClosed(self):
-		db = TemperatureDatabaseHandler('testTempDB.sql')
-		db.closeDBConnection();
-		assert not db.isConnected()
+def test_DBConnectedWithOverriddenConstructor (dbSetup):
+	assert dbSetup.isConnected()
 
-	def test_NewDBEmpty(self):
-		db = TemperatureDatabaseHandler('testTempDB.sql')
-		assert db.isEmpty()
+def test_NewDBEmpty(dbSetup):
+	assert dbSetup.isEmpty()
 
-	def test_DBNotEmptyAfterCommit(self):
-		db = TemperatureDatabaseHandler('testTempDB.sql')
-		db.logTemp("192.168.1.10", 100)
-		assert not db.isEmpty()
+def test_DBNotEmptyAfterCommit(dbSetup):
+	dbSetup.logTemp("192.168.1.10", 100)
+	assert not dbSetup.isEmpty()
+	dbSetup.deleteAllRecords()
 
-	def test_EntryCommittedSameSelected (self):
-		db = TemperatureDatabaseHandler('testTempDB.sql')
-		address = "192.168.1.10"
-		val = 100
-		db.logTemp(address, val)
+def test_EntryCommittedSameSelected (dbSetup):
+	address = "192.168.1.10"
+	val = 100
+	dbSetup.logTemp(address, val)
+	records = dbSetup.getAllRecords()
+	assert (val == records[0][2]) and (address == records[0][1])
+
+def test_DBConnectionAfterClosed(dbSetup):
+	dbSetup.closeDBConnection();
+	assert not dbSetup.isConnected() 
+
+
 
 
 

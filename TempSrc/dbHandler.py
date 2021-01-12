@@ -5,19 +5,24 @@
 
 import sqlite3
 from datetime import datetime
-
+import os
+import sys
+from pathlib import Path
+sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent, "Database"))
 
 class TemperatureDatabaseHandler:
 
 	dbConn = None
+	dbName = ""
 	tableName = "tempHistory"
 	dateFormat = "%Y-%m-%d %H:%M:%S"
 	currentTime = None
 
 
-	def __init__(self, dbAddress):
+	def __init__(self, givenName):
 		try:
-			self.dbConn = sqlite3.connect(dbAddress)
+			self.dbConn = sqlite3.connect(os.path.join(sys.path[0], givenName))
+			dbName = givenName
 		except Error as e:
 			print(e)
 
@@ -25,7 +30,7 @@ class TemperatureDatabaseHandler:
 			cur = self.dbConn.cursor()
 			cur.execute('''CREATE TABLE IF NOT EXISTS main.tempHistory(date DATETIME, host VARCHAR, tempValue REAL)''')
 			cur.execute('''PRAGMA journal_mode = WAL''')
-	
+
 	def isConnected (self):
 		return self.dbConn != None
 
@@ -42,7 +47,8 @@ class TemperatureDatabaseHandler:
 
 		cur = self.dbConn.cursor()
 		cur.execute("SELECT * FROM " + self.tableName)
-		return cur.fetchone() == None
+		numRecords = len(cur.fetchall())
+		return numRecords == 0
 		
 
     # Store a the passed temperature and sensor address.  Add a datetime stamp in an accepted SQLite format
@@ -53,9 +59,9 @@ class TemperatureDatabaseHandler:
 		self.currentTime = datetime.now(tz=None)
 		cur = self.dbConn.cursor()
 
-		sqliteInsertWithParams = '''INSERT INTO tempHistory VALUES (?, ?, ?)'''
+		insertParams = '''INSERT INTO tempHistory VALUES (?, ?, ?)'''
 		dataTuple = (self.currentTime.strftime(self.dateFormat), address, tempValue)
-		cur.execute(sqliteInsertWithParams, dataTuple)
+		cur.execute(insertParams, dataTuple)
 		self.dbConn.commit()
 
 
@@ -65,3 +71,10 @@ class TemperatureDatabaseHandler:
 
 		cur = self.dbConn.cursor()
 		return cur.execute('SELECT * from tempHistory;').fetchall()
+
+	def deleteAllRecords(self):
+		if not self.isConnected():
+			raise sqlite3.DatabaseError("Database not connected")
+
+		cur = self.dbConn.cursor()
+		cur.execute('DELETE from tempHistory;').fetchall()
