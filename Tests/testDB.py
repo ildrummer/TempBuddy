@@ -13,7 +13,10 @@ def dbSetup():
 	dateFormat = "%Y%m%d-%H%M%S"
 	dbName = "testDB_" + datetime.strftime(datetime.now(), dateFormat) + ".sql"
 	print("Fixture creating db with name: " + dbName)
-	return TemperatureDatabaseHandler(dbName)
+	db = TemperatureDatabaseHandler(dbName)
+	yield db
+	db.closeDBConnection()
+	os.remove(os.path.join(sys.path[0], dbName))
 
 
 def test_DBConnectedWithOverriddenConstructor (dbSetup):
@@ -27,30 +30,48 @@ def test_DBNotEmptyAfterCommit(dbSetup):
 	assert not dbSetup.isEmpty()
 	dbSetup.deleteAllRecords()
 
-def test_EntryCommittedSameSelected (dbSetup):
+def test_SingleEntryCommittedCorrectlyRetrieved (dbSetup):
 	address = "192.168.1.10"
 	val = 100
 	dbSetup.logTemp(address, val)
 	records = dbSetup.getAllRecords()
 	assert (val == records[0][2]) and (address == records[0][1])
+	dbSetup.deleteAllRecords()
+
+def test_MultipleEntriesCommitedReturnCorrectNumber (dbSetup):
+	for i in range(100):
+		dbSetup.logTemp(100, "192.168.1.10")
+	assert dbSetup.getRecordCount() == 100
+	dbSetup.deleteAllRecords()
+
+def test_CorrectTempEntriesRetrievedFromMany (dbSetup):
+	targetTemp = 100
+	numEntries = 5
+	for i in range(numEntries):
+		dbSetup.logTemp('192.168.1.10', targetTemp)
+	for i in range(10):
+		dbSetup.logTemp('192.168.1.12', 75)
+	for i in range(numEntries):
+		dbSetup.logTemp('192.168.1.10', targetTemp)
+
+	targetRecords = dbSetup.getRecordsByTemp(targetTemp)
+	assert len(targetRecords) == (numEntries * 2)
+	dbSetup.deleteAllRecords()
+
+def test_CorrectTempEntriesRetrievedFromMany (dbSetup):
+	targetAddress = '192.168.1.12'
+	numEntries = 5
+	for i in range(numEntries):
+		dbSetup.logTemp(targetAddress, 100)
+	for i in range(10):
+		dbSetup.logTemp('192.168.1.10', 75)
+	for i in range(numEntries):
+		dbSetup.logTemp(targetAddress, 100)
+
+	targetRecords = dbSetup.getRecordsByHost(targetAddress)
+	assert len(targetRecords) == (numEntries * 2)
+	dbSetup.deleteAllRecords()
 
 def test_DBConnectionAfterClosed(dbSetup):
 	dbSetup.closeDBConnection();
 	assert not dbSetup.isConnected() 
-
-
-
-
-
-#cur.execute('''CREATE TABLE IF NOT EXISTS main.tempHistory(date DATETIME, host VARCHAR, tempValue REAL)''')
-#cur.execute('''INSERT INTO tempHistory VALUES ('%s', '192.168.1.12', 1)''' % currentTime.strftime(dateFormat))
-#cur.execute('''INSERT INTO tempHistory VALUES ('%s', '192.168.1.10', 68.98)''' % currentTime.strftime(dateFormat))
-#cur.execute('''INSERT INTO tempHistory VALUES ('%s', '192.168.1.11', 70.01)''' % currentTime.strftime(dateFormat))
-#dbConn.commit()
-
-#print("1st record from database:")
-#print(cur.execute('SELECT * from tempHistory;').fetchone())
-#print("All records from database:")
-#print(cur.execute('SELECT * from tempHistory;').fetchall())
-
-#dbConn.close()

@@ -28,7 +28,7 @@ class TemperatureDatabaseHandler:
 
 		if self.isConnected():
 			cur = self.dbConn.cursor()
-			cur.execute('''CREATE TABLE IF NOT EXISTS main.tempHistory(date DATETIME, host VARCHAR, tempValue REAL)''')
+			cur.execute('''CREATE TABLE IF NOT EXISTS main.tempHistory(date DATETIME NOT NULL, host VARCHAR NOT NULL, tempValue REAL NOT NULL)''')
 			cur.execute('''PRAGMA journal_mode = WAL''')
 
 	def isConnected (self):
@@ -64,6 +64,13 @@ class TemperatureDatabaseHandler:
 		cur.execute(insertParams, dataTuple)
 		self.dbConn.commit()
 
+	def getRecordCount(self):
+		if not self.isConnected():
+			raise sqlite3.DatabaseError("Database not connected")
+
+		cur = self.dbConn.cursor()
+		cur.execute("SELECT * FROM " + self.tableName)
+		return len(cur.fetchall())
 
 	def getAllRecords(self):
 		if not self.isConnected():
@@ -71,6 +78,24 @@ class TemperatureDatabaseHandler:
 
 		cur = self.dbConn.cursor()
 		return cur.execute('SELECT * from tempHistory;').fetchall()
+
+	def getRecordsByHost (self, address):
+		if not self.isConnected():
+			raise sqlite3.DatabaseError("Database not connected")
+
+		cur = self.dbConn.cursor()
+		selectParams = '''SELECT * FROM tempHistory WHERE host = ?'''
+		cur.execute(selectParams, [address])
+		return cur.fetchall()
+
+	def getRecordsByTemp (self, temp):
+		if not self.isConnected():
+			raise sqlite3.DatabaseError("Database not connected")
+
+		cur = self.dbConn.cursor()
+		selectParams = '''SELECT * FROM tempHistory WHERE tempValue = ?'''
+		cur.execute(selectParams, [temp])
+		return cur.fetchall()	
 
 	def deleteAllRecords(self):
 		if not self.isConnected():
