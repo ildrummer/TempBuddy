@@ -28,4 +28,4 @@ class TestTempThread:
 		t = TemperatureThread(target=foo, args=(val,))
 		t.start();
 		returnVal = t.join()
-		assert returnVal != "poo"
+		assert returnVal != "too"
