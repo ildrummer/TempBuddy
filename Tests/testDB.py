@@ -11,7 +11,7 @@ from dbHandler import TemperatureDatabaseHandler
 @pytest.fixture(scope="session")
 def dbSetup():
 	dateFormat = "%Y%m%d-%H%M%S"
-	dbName = "testDB_" + datetime.strftime(datetime.now(), dateFormat) + ".sql"
+	dbName = "testDB_" + datetime.strftime(datetime.now(), dateFormat) + ".sqlite3"
 	print("Fixture creating db with name: " + dbName)
 	db = TemperatureDatabaseHandler(dbName)
 	yield db
@@ -38,10 +38,25 @@ def test_SingleEntryCommittedCorrectlyRetrieved (dbSetup):
 	assert (val == records[0][2]) and (address == records[0][1])
 	dbSetup.deleteAllRecords()
 
+
+def test_SingleEntryCommittedDoesntMatchIncorrectValueWhenRetrieved (dbSetup):
+	address = "192.168.1.10"
+	val = 100
+	dbSetup.logTemp(address, val)
+	records = dbSetup.getAllRecords()
+	assert not ((val + 1) == records[0][2]) and not ((address + "!") == records[0][1])
+	dbSetup.deleteAllRecords()
+
 def test_MultipleEntriesCommitedReturnCorrectNumber (dbSetup):
 	for i in range(100):
 		dbSetup.logTemp(100, "192.168.1.10")
 	assert dbSetup.getRecordCount() == 100
+	dbSetup.deleteAllRecords()
+
+def test_MultipleEntriesCommitedDoesntReturnIncorrectNumber (dbSetup):
+	for i in range(100):
+		dbSetup.logTemp(100, "192.168.1.10")
+	assert not dbSetup.getRecordCount() == 1
 	dbSetup.deleteAllRecords()
 
 def test_CorrectTempEntriesRetrievedFromMany (dbSetup):
@@ -58,7 +73,7 @@ def test_CorrectTempEntriesRetrievedFromMany (dbSetup):
 	assert len(targetRecords) == (numEntries * 2)
 	dbSetup.deleteAllRecords()
 
-def test_CorrectTempEntriesRetrievedFromMany (dbSetup):
+def test_CorrectAddressEntriesRetrievedFromMany (dbSetup):
 	targetAddress = '192.168.1.12'
 	numEntries = 5
 	for i in range(numEntries):
