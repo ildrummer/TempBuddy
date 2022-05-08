@@ -18,6 +18,7 @@ for address in tempHosts:
 	else:
 		if response.status_code == 200:
 			print (address + " temp: " + str(response.json()['value']))	
+			print (response.json())
 		else:
 			print("Error code from ESP32 " + address + ": " + str(response.status_code))
 
