@@ -13,3 +13,11 @@ My house is not a consistent temperature and I don't know why (well, counting th
 
 # Implementation
 1. ESP-32 CAM with DS18B20 waterproof temperature sensor on breadboard.  Microcontroller programmed with file in ESP32 ArduinoC/Remote_Temp_ESP32.ino
+
+
+# To Do
+## Inversion of Control
+1. Data Access Object pattern for DB
+2. Sensor interface for temp sensors
+
+## Dependency Injection for Testing
