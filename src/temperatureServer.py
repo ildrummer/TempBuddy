@@ -8,12 +8,25 @@ import threading
 import json
 import requests
 import sys
-import sys
+import signal
 import logging
-from tempDBHandler import TemperatureDatabaseHandler
-from tempThread import TemperatureThread
+from dao.SQLiteTempDao import TemperatureDatabaseHandler
+from util.DelayedKeyboardInterrupt import DelayedKeyboardInterrupt
+from util.ReturnValueThread import TemperatureThread
 
 #from logging.config import fileConfig
+
+
+class TemperatureServer:
+
+	kill_now = False
+  
+	def __init__(self):
+		signal.signal(signal.SIGINT, self.exit_gracefully)
+		signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+	def exit_gracefully(self, *args):
+    	self.kill_now = True
 
 
 tempHosts = ["192.168.1.10", "192.168.1.11", "192.168.1.12"]
@@ -76,25 +89,25 @@ def getTemp(address):
 
 
 def collectDataLoop():
-	
-	
-
 	threads = []
 
-	for x in tempHosts:
+	for x in sensors:
 
-		tempThread = TemperatureThread(target=getTemp, args=(x,))
-		threads.append(tempThread)
-		tempThread.start()
+		thread = TemperatureThread(target=getTemp, args=(x,))
+		threads.append(thread)
+		thread.start()
 
 	for x in range(len(threads)):
-		logTemp(tempHosts[x], threads[x].join())
+		logTemp(sensors[x], threads[x].join())
 	return
 
 
 
 def main():
 	setupLogging()
+	setupDatabase()
+
+	recordTemperatures()
 	dbConn = TemperatureDatabaseHandler('test.sql')
 
 	for i in range(3):
@@ -110,6 +123,46 @@ def main():
 
 
 	dbConn.closeDBConnection()
+
+
+def main():
+	
+	tempServer = None
+
+	try:
+		# Shield _start() from termination.
+		try:
+			with DelayedKeyboardInterrupt():
+				tempServer = TemperatureServer()
+
+		# If there was an attempt to terminate the application,
+		# the KeyboardInterrupt is raised AFTER the _start() finishes
+		# its job.
+		#
+		# In that case, the KeyboardInterrupt is re-raised and caught in
+		# exception handler below and _stop() is called to clean all resources.
+		#
+		# Note that it might be generally unsafe to call stop() methods
+		# on objects that are not started properly.
+		# This is the main reason why the whole execution of _start()
+		# is shielded.
+
+		except KeyboardInterrupt:
+			print(f'!!! got KeyboardInterrupt during start')
+			raise
+
+		# Application is started now and is running.
+		# Wait for a termination event infinitelly.
+		tempServer._run()
+
+	except KeyboardInterrupt:
+		# The _stop() is also shielded from termination.
+		try:
+			with DelayedKeyboardInterrupt():
+				tempServer._stop()
+		except KeyboardInterrupt:
+			print(f'!!! got KeyboardInterrupt during stop')
+
 
 if __name__ == "__main__":
 	main()

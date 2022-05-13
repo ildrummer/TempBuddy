@@ -1,0 +1,12 @@
+{
+    "cmake.configureOnOpen": false,
+    "python.analysis.extraPaths": [
+        "./src/",
+        "./test"
+    ],
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
+}

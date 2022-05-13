@@ -1,14 +1,5 @@
 # SQLite implementation of the TempDaoInterface
 #
-# Temp schema:
-# CREATE TABLE "TEMPERATURES" (
-#	"RECORD_ID" INTEGER PRIMARY KEY AUTOINCREMENT,
-#	"DATETIME" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-#	"TEMP" REAL NOT NULL DEFAULT 0,
-#	"SENSOR" VARCHAR(50) NOT NULL DEFAULT '0',
-#	UNIQUE(SENSOR, DATETIME)
-#	);
-#
 # @author ildrummer
 # @version 0.1
 
@@ -30,7 +21,7 @@ class SQLiteTempDao:
 		self.dbConn = None
 		self.cursor = None
 		self.dbName = ""
-		self.tableName = "tempHistory"
+		self.tableName = "TEMPERATURES"
 		self.dateFormat = "%Y-%m-%d %H:%M:%S"
 		self.currentTime = None
 
@@ -43,14 +34,15 @@ class SQLiteTempDao:
 		if self.isConnected():
 			self.cursor = self.dbConn.cursor()
 			self.cursor.execute('''
-				CREATE TABLE "{0}" (
+				CREATE TABLE IF NOT EXISTS "{0}" (
 					"RECORD_ID" INTEGER PRIMARY KEY AUTOINCREMENT,
 					"DATETIME" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 					"TEMP" REAL NOT NULL DEFAULT 0,
-					"SENSOR" VARCHAR(50) NOT NULL DEFAULT '0'
-				)
-				;'''.format(self.tableName))
+					"SENSOR_ID" VARCHAR(50) NOT NULL DEFAULT '0',
+					CONSTRAINT "SENSOR_ID" FOREIGN KEY ("SENSOR_ID") REFERENCES "SENSORS" ("ID")
+				);'''.format(self.tableName))
 			self.cursor.execute('''PRAGMA journal_mode = WAL''')
+			self.cursor.execute('''PRAGMA foreign_keys = ON;''')
 
 	def isConnected (self):
 		return self.dbConn != None
@@ -77,7 +69,7 @@ class SQLiteTempDao:
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		insertParams = '''INSERT INTO {0} (SENSOR, TEMP) VALUES (?,?);'''.format(self.tableName)
+		insertParams = '''INSERT INTO {0} (SENSOR_ID, TEMP) VALUES (?,?);'''.format(self.tableName)
 		self.cursor.execute(insertParams, (sensorId, tempValue))
 		self.dbConn.commit()
 
@@ -85,13 +77,13 @@ class SQLiteTempDao:
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		return self.cursor.execute('SELECT RECORD_ID, SENSOR, TEMP, DATETIME from {0};'.format(self.tableName)).fetchall()
+		return self.cursor.execute('SELECT RECORD_ID, SENSOR_ID, TEMP, DATETIME FROM {0};'.format(self.tableName)).fetchall()
 
 	def getRecordsBySensor (self, sensorId: String):
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		selectParams = '''SELECT RECORD_ID, TEMP, DATETIME FROM {0} WHERE SENSOR = ?;'''.format(self.tableName)
+		selectParams = '''SELECT RECORD_ID, TEMP, DATETIME FROM {0} WHERE SENSOR_ID = ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [sensorId])
 		return self.cursor.fetchall()
 
@@ -101,7 +93,7 @@ class SQLiteTempDao:
 
 		# need some timestamp format validation here
 
-		selectParams = '''SELECT RECORD_ID, SENSOR, TEMP, DATETIME FROM {0} WHERE DATETIME BETWEEN ? AND ?;'''.format(self.tableName)
+		selectParams = '''SELECT RECORD_ID, SENSOR_ID, TEMP, DATETIME FROM {0} WHERE DATETIME BETWEEN ? AND ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [startTime, endTime])
 		return self.cursor.fetchall()
 
@@ -109,7 +101,7 @@ class SQLiteTempDao:
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		selectParams = '''SELECT RECORD_ID, SENSOR, TEMP, DATETIME FROM {0} WHERE TEMP BETWEEN ? AND ?;'''.format(self.tableName)
+		selectParams = '''SELECT RECORD_ID, SENSOR_ID, TEMP, DATETIME FROM {0} WHERE TEMP BETWEEN ? AND ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [lowTemp, highTemp])
 		return self.cursor.fetchall()	
 
@@ -125,5 +117,5 @@ class SQLiteTempDao:
 
 		# need some timestamp format validation here
 
-		selectParams = ''''DELETE FROM {0}; VACUUM DATETIME BETWEEN ? AND ?;'''.format(self.tableName)
+		selectParams = ''''DELETE FROM {0} WHERE DATETIME BETWEEN ? AND ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [startTime, endTime])
