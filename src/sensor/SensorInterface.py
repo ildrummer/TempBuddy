@@ -1,3 +1,5 @@
+import abc
+
 #
 # Sensor Interface
 #

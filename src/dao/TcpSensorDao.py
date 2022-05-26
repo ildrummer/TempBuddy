@@ -8,18 +8,21 @@ from datetime import datetime
 import os
 import sys
 import uuid
+import logging
 from pathlib import Path
 from tokenize import String
 from xmlrpc.client import boolean
-from sensor.SensorInterface import Sensor
 from src.dao.SensorDaoInterface import SensorDaoInterface
 
-sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent, "Database"))
+sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent.parent, "Database"))
 
 @SensorDaoInterface.register
 class TcpSensorDao:
 
-	def __init__(self, givenName):
+	def __init__(self, dbName):
+
+		self.logger = self.setupLogging(logging.getLogger("TcpSensorDao"))
+		self.logger.info("Attempting to connect to Sensor DB: {0}".format(os.path.join(sys.path[0], dbName)))
 
 		self.dbConn = None
 		self.cursor = None
@@ -29,8 +32,8 @@ class TcpSensorDao:
 		self.currentTime = None
 
 		try:
-			self.dbConn = sqlite3.connect(os.path.join(sys.path[0], givenName))
-			dbName = givenName
+			self.dbConn = sqlite3.connect(os.path.join(sys.path[0], dbName))
+			self.dbName = dbName
 		except Exception as e:
 			print(e)
 
@@ -45,6 +48,26 @@ class TcpSensorDao:
 				);'''.format(self.tableName))
 			self.cursor.execute('''PRAGMA journal_mode = WAL''')
 			self.cursor.execute('''PRAGMA foreign_keys = ON;''')
+
+			self.logger.info("Connected")
+
+	def setupLogging(self, logger):
+
+		tempFormat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+		streamHandler = logging.StreamHandler(sys.stdout)
+		streamHandler.setFormatter(tempFormat)
+		streamHandler.setLevel(logging.INFO)
+
+		fileHandler = logging.FileHandler('.\\logs\\tcpsensordao.log')
+		fileHandler.setFormatter(tempFormat)
+		fileHandler.setLevel(logging.DEBUG)
+
+		logger.setLevel(logging.DEBUG)
+		logger.addHandler(streamHandler)
+		logger.addHandler(fileHandler)
+
+		return logger
 
 	def isConnected (self):
 		return self.dbConn != None
