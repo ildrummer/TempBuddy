@@ -3,6 +3,7 @@
 #    - currently set up to gather data once and then end.  Will be modified for temperature collection/storage every minute.
 #
 
+import random
 import time
 import threading
 import json
@@ -12,24 +13,26 @@ import signal
 import logging
 from dao.SQLiteTempDao import SQLiteTempDao
 from dao.TcpSensorDao import TcpSensorDao
+from sensor.SensorInterface import SensorInterface
+from sensor.TCPSensor import TcpSensor
 from util.DelayedKeyboardInterrupt import DelayedKeyboardInterrupt
 from util.ReturnValueThread import TemperatureThread
 
 #from logging.config import fileConfig
 
-
 class TemperatureServer:
   
-	def __init__(self, sensorDbName, tempDbName):
+	def __init__(self, sensorDaoName, tempDaoName):
 		
 		self.logger = self.setupLogging(logging.getLogger(__name__))
 		self.logger.info("Logging setup completed")
 
-		time.sleep(3)
+		self.sensorDao = self.setupSensorDatabase(sensorDaoName)
+		self.tempDao = self.setupTemperatureDatabase(tempDaoName)
 
-		self.sensorDb = self.setupSensorDatabase(sensorDbName)
-		self.tempDb = self.setupTemperatureDatabase(tempDbName)
+		self.sensors = []
 
+		
 		self.logger.info("Initialization complete")
  
 	def setupLogging(self, logger):
@@ -51,55 +54,75 @@ class TemperatureServer:
 		return logger
 
 
-	def setupSensorDatabase(self, sensorDbName: str):
-		sensorDb = TcpSensorDao(sensorDbName)
-		return sensorDb if sensorDb.isConnected() else None
+	def setupSensorDatabase(self, sensorDaoName: str):
+		sensorDao = TcpSensorDao(sensorDaoName)
+
+		# if sensorDao:
+		# 	sensorDao.storeSensor("test {0}".format(random.randint(0, 100)), "192.168.1.{0}".format(random.randint(0,999)), True)
+
+		return sensorDao if sensorDao.isConnected() else None
 	
-	def setupTemperatureDatabase(self, tempDbName: str):
-		tempDb = SQLiteTempDao(tempDbName)
-		return tempDb if tempDb.isConnected() else None
+	def getSensors(self):
+		if self.sensors is not None and len(self.sensors) is 0 and self.sensorDao:
+			self.sensors = self.sensorDao.getAllSensors()
+		return self.sensors
 
-	def logTemp(self, sensorId, tempValue):
+
+	def setupTemperatureDatabase(self, tempDaoName: str):
+		tempDao = SQLiteTempDao(tempDaoName)
+		return tempDao if tempDao.isConnected() else None
+
+	def logTemp(self, sensor, tempValue):
 		# Call the database handler to store a temperature value from a remote sensor into an SQLite database
-		if self.tempDb:
-			self.tempDb.storeRecord(sensorId, tempValue)
+		if self.tempDao:
+			self.tempDao.storeRecord(sensor.id, tempValue)
+			self.logger.info("Sensor {0} - {1}".format(sensor.name, tempValue))
 
 
-	def collectDataLoop(self):
+	def collectData(self):
 		threads = []
 
-		for x in sensors:
-
-			thread = TemperatureThread(target=getTemp, args=(x,))
-			threads.append(thread)
-			thread.start()
+		for x in self.sensors:
+			if x.enabled:
+				thread = TemperatureThread(target=TcpSensor.getTemperature, args=(x,))
+				threads.append(thread)
+				thread.start()
 
 		for x in range(len(threads)):
-			self.logTemp(sensors[x], threads[x].join())
+			self.logTemp(self.sensors[x], threads[x].join())
 		return
 
 
 
 	def _run(self):
-		
-		while True:
-			print ("Running!")
-			time.sleep(2)
+
+		print("Sensors:")
+		for sensor in self.getSensors():
+			print("\t{0}".format(sensor))
+
+		self.collectData()
+
+		# while True:
+		# 	print ("Running!")
+			
+
+		# 	time.sleep(2)
 
 		# for i in range(3):
 		# 	self.logger.info("Starting temperature collection")
 		# 	self.collectDataLoop()
 		# 	time.sleep(5)
 
+
 	def _shutdown(self, reason: str):
 		if self.logger:
 			self.logger.info("Shutting down Temp Server.  Reason: {0}".format(reason))
 		
-		if self.tempDb:
-			self.tempDb.closeDBConnection
+		if self.tempDao:
+			self.tempDao.closeDBConnection
 		
-		if self.sensorDb:
-			self.sensorDb.closeDBConnection
+		if self.sensorDao:
+			self.sensorDao.closeDBConnection
 		
 		if self.logger:
 			self.logger.info("Database connections closed")
@@ -112,7 +135,7 @@ def main():
 		# Shield _start() from termination.
 		try:
 			with DelayedKeyboardInterrupt():
-				tempServer = TemperatureServer('tempSensors.sql', 'temperatures.sql')
+				tempServer = TemperatureServer('tempBhuti.sqlite3.db', 'tempBhuti.sqlite3.db')
 
 		# If there was an attempt to terminate the application,
 		# the KeyboardInterrupt is raised AFTER the _start() finishes

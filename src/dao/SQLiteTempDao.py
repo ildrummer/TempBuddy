@@ -12,7 +12,7 @@ from pathlib import Path
 from tokenize import String
 from src.dao.TempDaoInterface import TempDaoInterface
 
-sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent.parent, "Database"))
+sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent.parent, "database"))
 
 @TempDaoInterface.register
 class SQLiteTempDao:

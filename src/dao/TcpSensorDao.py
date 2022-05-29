@@ -12,9 +12,10 @@ import logging
 from pathlib import Path
 from tokenize import String
 from xmlrpc.client import boolean
+from sensor.TCPSensor import TcpSensor
 from src.dao.SensorDaoInterface import SensorDaoInterface
 
-sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent.parent, "Database"))
+sys.path.insert(0, os.path.join(Path(__file__).resolve().parent.parent.parent, "database"))
 
 @SensorDaoInterface.register
 class TcpSensorDao:
@@ -104,11 +105,11 @@ class TcpSensorDao:
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		rows = self.cursor.execute('SELECT ID, PATH, ENABLED FROM {0};'.format(self.tableName)).fetchall()
+		rows = self.cursor.execute('SELECT ID, NAME, PATH, ENABLED FROM {0};'.format(self.tableName)).fetchall()
 
 		sensors = []
 		for r in rows:
-			sensors.append(self.getSensorFromRow(r))
+			sensors.append(self.getSensorFromRow(r, self.logger))
 
 		return sensors
 
@@ -116,7 +117,7 @@ class TcpSensorDao:
 		if not self.isConnected():
 			raise sqlite3.DatabaseError("Database not connected")
 
-		selectParams = '''SELECT ID, PATH, ENABLED FROM {0} WHERE ID = ?;'''.format(self.tableName)
+		selectParams = '''SELECT ID, NAME, PATH, ENABLED FROM {0} WHERE ID = ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [sensorId])
 		return self.getSensorFromRow(self.cursor.fetchall())
 
@@ -159,11 +160,13 @@ class TcpSensorDao:
 		selectParams = '''DELETE FROM {0} WHERE ID = ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [sensorId])
 
-	def getSensorFromRow (self, row):
-		sensor = Sensor()
-		sensor.id = row[0]
-		sensor.name = row[1]
-		sensor.path = row[2]
-		sensor.enabled = row[3]
+	def getSensorFromRow (self, row, logger):
 
-		return sensor
+		self.logger.debug("Creating sensor from: {0}".format(row))
+
+		id = row[0]
+		name = row[1]
+		path = row[2]
+		enabled = row[3]
+
+		return TcpSensor(id, name, path, enabled, logger)

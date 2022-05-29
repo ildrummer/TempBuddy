@@ -9,7 +9,7 @@ from sensor.SensorInterface import SensorInterface
 
 
 @SensorInterface.register
-class Sensor():
+class TcpSensor():
 
     def __init__(self, id: str, name: str, path: str, enabled: bool, logger: Logger):
         self.id = id
@@ -18,6 +18,9 @@ class Sensor():
         self.enabled = enabled
         self.logger = logger
     
+    def __str__(self):
+        return "Sensor {0} with path {1} is {2}".format(self.name, self.path, "enabled" if self.enabled else "disabled")
+
     def getTemperature(self):
     # Call a REST API function on a remote temperature sensor and extract the temperature value from the JSON response
         self.logger.info('Polling TCP sensor {0}'.format(self.name))
