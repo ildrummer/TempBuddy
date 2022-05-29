@@ -10,14 +10,16 @@ My house is not a consistent temperature and I don't know why (well, counting th
 ## Techniques
 1. Test-driven development using PyTest
 2. Multithreading (ESP32-CAMs are slooooow)
+3. Containerization to handle application resilience (restart on failure)
 
 # Implementation
-1. ESP-32 CAM with DS18B20 waterproof temperature sensor on breadboard.  Microcontroller programmed with file in ESP32 ArduinoC/Remote_Temp_ESP32.ino
 
+## Hardware
+1. ESP-32 CAM microcontroller with DS18B20 waterproof temperature sensor on breadboard.  See this [Random Nerd Tutorials article](https://randomnerdtutorials.com/esp32-ds18b20-temperature-arduino-ide/). 
+2. Rasperry Pi 3 running the temperature server 24/7.
 
-# To Do
-## Inversion of Control
-1. Data Access Object pattern for DB
-2. Sensor interface for temp sensors
-
-## Dependency Injection for Testing
+## Software
+1. ESP-32 programmed with file in [/ESP32_ArduinoC/Remote_Temp_ESP32.ino](/ESP32_ArduinoC/Remote_Temp_ESP32.ino).  Runs as a REST endpoint and serves JSON temperature data.
+2. SQLite3 database to store temperature data, sensors
+3. Python server that polls all sensors for data and stores the temperatures returned.
+4. Docker container encapsulating Python server and database.

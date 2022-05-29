@@ -58,7 +58,7 @@ class SQLiteTempDao:
 		streamHandler.setFormatter(tempFormat)
 		streamHandler.setLevel(logging.INFO)
 
-		fileHandler = logging.FileHandler('.\\logs\\sqlitetempdao.log')
+		fileHandler = logging.FileHandler('..\\logs\\sqlitetempdao.log')
 		fileHandler.setFormatter(tempFormat)
 		fileHandler.setLevel(logging.DEBUG)
 

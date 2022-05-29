@@ -24,7 +24,7 @@ class TemperatureServer:
   
 	def __init__(self, sensorDaoName, tempDaoName):
 		
-		self.logger = self.setupLogging(logging.getLogger(__name__))
+		self.logger = self.setupLogging(logging.getLogger("TemperatureServer"))
 		self.logger.info("Logging setup completed")
 
 		self.sensorDao = self.setupSensorDatabase(sensorDaoName)
@@ -43,7 +43,7 @@ class TemperatureServer:
 		streamHandler.setFormatter(tempFormat)
 		streamHandler.setLevel(logging.INFO)
 
-		fileHandler = logging.FileHandler('.\\logs\\temperatures.log')
+		fileHandler = logging.FileHandler('..\\logs\\temperatures.log')
 		fileHandler.setFormatter(tempFormat)
 		fileHandler.setLevel(logging.DEBUG)
 
@@ -76,7 +76,6 @@ class TemperatureServer:
 		# Call the database handler to store a temperature value from a remote sensor into an SQLite database
 		if self.tempDao:
 			self.tempDao.storeRecord(sensor.id, tempValue)
-			self.logger.info("Sensor {0} - {1}".format(sensor.name, tempValue))
 
 
 	def collectData(self):
@@ -89,9 +88,11 @@ class TemperatureServer:
 				thread.start()
 
 		for x in range(len(threads)):
-			self.logTemp(self.sensors[x], threads[x].join())
-		return
+			temp = threads[x].join()
 
+			if temp is not None:
+				self.logTemp(self.sensors[x], temp)
+		return
 
 
 	def _run(self):
@@ -100,18 +101,9 @@ class TemperatureServer:
 		for sensor in self.getSensors():
 			print("\t{0}".format(sensor))
 
-		self.collectData()
-
-		# while True:
-		# 	print ("Running!")
-			
-
-		# 	time.sleep(2)
-
-		# for i in range(3):
-		# 	self.logger.info("Starting temperature collection")
-		# 	self.collectDataLoop()
-		# 	time.sleep(5)
+		while True:
+			self.collectData()
+			time.sleep(60)
 
 
 	def _shutdown(self, reason: str):

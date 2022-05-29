@@ -3,6 +3,8 @@
 #
 
 from logging import Logger
+import logging
+import sys
 
 import requests
 from sensor.SensorInterface import SensorInterface
@@ -11,21 +13,39 @@ from sensor.SensorInterface import SensorInterface
 @SensorInterface.register
 class TcpSensor():
 
-    def __init__(self, id: str, name: str, path: str, enabled: bool, logger: Logger):
+    def __init__(self, id: str, name: str, path: str, enabled: bool):
         self.id = id
         self.name = name
         self.path = path
         self.enabled = enabled
-        self.logger = logger
+        self.logger = self.setupLogging(logging.getLogger("TcpSensorDao_{0}".format(self.id)))
     
     def __str__(self):
         return "Sensor {0} with path {1} is {2}".format(self.name, self.path, "enabled" if self.enabled else "disabled")
 
+
+    def setupLogging(self, logger):
+        tempFormat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        streamHandler = logging.StreamHandler(sys.stdout)
+        streamHandler.setFormatter(tempFormat)
+        streamHandler.setLevel(logging.INFO)
+
+        fileHandler = logging.FileHandler('..\\logs\\tcpsensordao.log')
+        fileHandler.setFormatter(tempFormat)
+        fileHandler.setLevel(logging.DEBUG)
+
+        logger.setLevel(logging.DEBUG)
+        logger.addHandler(streamHandler)
+        logger.addHandler(fileHandler)
+
+        return logger
+
+
     def getTemperature(self):
     # Call a REST API function on a remote temperature sensor and extract the temperature value from the JSON response
-        self.logger.info('Polling TCP sensor {0}'.format(self.name))
+        self.logger.debug('Polling TCP sensor {0}'.format(self.name))
 
-        remoteTemp = -400
+        remoteTemp = None
 
         try:
             response = requests.get("http://{0}/temperature".format(self.path), timeout=10)

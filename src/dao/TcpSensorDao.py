@@ -60,7 +60,7 @@ class TcpSensorDao:
 		streamHandler.setFormatter(tempFormat)
 		streamHandler.setLevel(logging.INFO)
 
-		fileHandler = logging.FileHandler('.\\logs\\tcpsensordao.log')
+		fileHandler = logging.FileHandler('..\\logs\\tcpsensordao.log')
 		fileHandler.setFormatter(tempFormat)
 		fileHandler.setLevel(logging.DEBUG)
 
@@ -109,7 +109,7 @@ class TcpSensorDao:
 
 		sensors = []
 		for r in rows:
-			sensors.append(self.getSensorFromRow(r, self.logger))
+			sensors.append(self.getSensorFromRow(r))
 
 		return sensors
 
@@ -160,7 +160,7 @@ class TcpSensorDao:
 		selectParams = '''DELETE FROM {0} WHERE ID = ?;'''.format(self.tableName)
 		self.cursor.execute(selectParams, [sensorId])
 
-	def getSensorFromRow (self, row, logger):
+	def getSensorFromRow (self, row):
 
 		self.logger.debug("Creating sensor from: {0}".format(row))
 
@@ -169,4 +169,4 @@ class TcpSensorDao:
 		path = row[2]
 		enabled = row[3]
 
-		return TcpSensor(id, name, path, enabled, logger)
+		return TcpSensor(id, name, path, enabled)
